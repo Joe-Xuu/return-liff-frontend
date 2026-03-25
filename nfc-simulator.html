@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Re:Turn 硬件归还模拟器</title>
+  <style>
+    body { font-family: -apple-system, sans-serif; background: #2d3748; color: #fff; padding: 20px; display: flex; justify-content: center; }
+    .card { background: #1a202c; padding: 30px; border-radius: 12px; width: 100%; max-width: 400px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); border: 1px solid #4a5568;}
+    h2 { margin-top: 0; color: #48bb78; border-bottom: 2px dashed #4a5568; padding-bottom: 10px; }
+    label { font-size: 12px; color: #a0aec0; font-weight: bold; display: block; margin-top: 15px; margin-bottom: 5px; }
+    input { width: 100%; padding: 10px; box-sizing: border-box; background: #2d3748; border: 1px solid #4a5568; color: #fff; border-radius: 6px; font-family: monospace; }
+    input:focus { outline: none; border-color: #48bb78; }
+    button { width: 100%; padding: 12px; background: #48bb78; color: #1a202c; border: none; font-weight: bold; font-size: 16px; border-radius: 6px; margin-top: 20px; cursor: pointer; transition: 0.2s; }
+    button:active { transform: scale(0.98); background: #38a169; }
+    #console { margin-top: 20px; padding: 15px; background: #000; border-radius: 6px; font-family: monospace; font-size: 12px; color: #38a169; min-height: 80px; white-space: pre-wrap; word-wrap: break-word; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>📡 Pi NFC Simulator</h2>
+    
+    <label>GAS Web App URL (必填)</label>
+    <input type="text" id="gas-url" placeholder="https://script.google.com/macros/s/AKfycbybohIvFuZ7GZC7KVckrjb4mn1SFFT1wG-Z1Anabt02il3N05NweJNgsctcFedsi6QY/exec">
+    
+    <label>Container ID (模拟读取的NFC标签)</label>
+    <input type="text" id="cid" placeholder="例如: C-001">
+    
+    <button onclick="simulateReturn()" id="btn-send">💳 模拟 NFC Touch!</button>
+    
+    <div id="console">> Ready...</div>
+  </div>
+
+  <script>
+    // 自动读取上次输入的 URL
+    const savedUrl = localStorage.getItem('sim_gas_url');
+    if (savedUrl) document.getElementById('gas-url').value = savedUrl;
+
+    function log(msg, isError = false) {
+      const consoleEl = document.getElementById('console');
+      const time = new Date().toLocaleTimeString();
+      consoleEl.innerHTML = `[${time}] ${msg}\n`;
+      consoleEl.style.color = isError ? '#fc8181' : '#68d391';
+    }
+
+    function simulateReturn() {
+      const url = document.getElementById('gas-url').value.trim();
+      const cid = document.getElementById('cid').value.trim();
+      const btn = document.getElementById('btn-send');
+      
+      if (!url || !cid) { log("⚠️ 错误：URL 和 Container ID 不能为空", true); return; }
+      
+      localStorage.setItem('sim_gas_url', url); // 存下 URL 方便下次测试
+      btn.innerText = "⏳ 发送中...";
+      log(`正在发送归还请求: Container ID [${cid}]...`);
+
+      fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ action: 'return', containerId: cid })
+      })
+      .then(res => res.json())
+      .then(data => {
+        log(`✅ 响应成功:\n${JSON.stringify(data, null, 2)}`);
+      })
+      .catch(err => {
+        log(`❌ 请求失败:\n${err}`, true);
+      })
+      .finally(() => {
+        btn.innerText = "💳 模拟 NFC Touch!";
+      });
+    }
+  </script>
+</body>
+</html>
