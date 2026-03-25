@@ -9,25 +9,38 @@
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     
     <style>
-      :root { --main-green: #06C755; --dark-bg: #1A1D20; --card-bg: #ffffff; }
-      body { font-family: "Noto Sans JP", sans-serif; background-color: #f0f4f8; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 20px 0; color: #333; overflow-x: hidden; }
+      :root { --main-green: #06C755; --dark-bg: #1A1D20; --card-bg: #ffffff; --card-shadow: rgba(0,0,0,0.06);}
       
-      /* 开屏与基础样式保持不变 */
+      /* --- ⭐ 样式修改：将最底层背景设为纯白 --- */
+      body { 
+        font-family: "Noto Sans JP", sans-serif; 
+        background-color: #ffffff; /* ⭐ 纯白背景 */
+        display: flex; flex-direction: column; align-items: center; justify-content: center; 
+        min-height: 100vh; margin: 0; padding: 20px 0; color: #333; overflow-x: hidden; 
+      }
+      
+      /* --- 统一的现代电竞风格开屏动画 --- */
       #splash-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--main-green); z-index: 9999; display: flex; justify-content: center; align-items: center; flex-direction: column; transition: opacity 0.6s ease-out, visibility 0.6s; }
       .splash-title { font-family: 'Montserrat', sans-serif; font-size: 56px; font-weight: 900; color: white; letter-spacing: 2px; text-shadow: 0 10px 20px rgba(0,0,0,0.15); animation: popScale 1s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
       .splash-greeting { font-family: 'Montserrat', sans-serif; font-size: 14px; font-weight: 700; color: rgba(255,255,255,0.9); margin-top: 10px; letter-spacing: 2px; text-transform: uppercase; animation: fadeInUp 0.5s 0.3s both; }
       .fade-out { opacity: 0; visibility: hidden; pointer-events: none; }
 
       .top-logo { height: 40px; margin-bottom: 15px; }
-      .card { background: var(--card-bg); width: 85%; max-width: 350px; padding: 30px 25px; border-radius: 24px; box-shadow: 0 16px 40px rgba(0,0,0,0.06); text-align: center; position: relative; }
+      /* 卡片悬浮于白底上，保留精致阴影区分 */
+      .card { background: var(--card-bg); width: 85%; max-width: 350px; padding: 30px 25px; border-radius: 24px; box-shadow: 0 16px 40px var(--card-shadow); text-align: center; position: relative; }
       h1 { margin: 0; font-size: 26px; font-weight: 900; letter-spacing: -0.5px; }
       p.subtitle { margin: 5px 0 20px 0; font-size: 13px; color: #888; font-weight: 700; }
+      
+      /* 借出界面的 ID 包装器 */
       .id-wrapper { background: #f8fafc; border-radius: 16px; padding: 20px; margin-bottom: 25px; border: 2px solid #edf2f7; }
       .container-id { font-size: 42px; font-weight: 900; font-family: 'Montserrat', sans-serif; color: #111; }
       
+      /* 统一的主按钮样式 (Montserrat粗体) */
       button.btn-main { background: var(--main-green); color: white; border: none; padding: 18px; font-size: 18px; font-family: 'Montserrat', sans-serif; border-radius: 50px; width: 100%; font-weight: 900; letter-spacing: 1px; box-shadow: 0 8px 20px rgba(6, 199, 85, 0.3); transition: transform 0.1s, box-shadow 0.1s; cursor:pointer;}
       button.btn-main:active { transform: scale(0.96); box-shadow: 0 4px 10px rgba(6, 199, 85, 0.2); }
+      button.btn-main:disabled { background: #E0E0E0; color: #999; box-shadow: none; cursor: not-allowed; }
 
+      /* --- 成功视图与环保转化 (保留) --- */
       .success-view { display: none; }
       .success-icon { font-size: 60px; color: var(--main-green); animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; transform: scale(0); margin-bottom: -10px;}
       .impact-card { background: #f0fdf4; border: 2px solid #b9f6ca; border-radius: 16px; padding: 15px; margin: 15px 0; animation: slideUp 0.6s 0.2s both; }
@@ -40,20 +53,15 @@
       .btn-edit { background: none; border: none; font-size: 11px; font-weight: 700; color: #888; cursor: pointer; padding: 5px 10px; border-radius: 12px; background: #f0f4f8; transition: 0.2s; }
       .btn-edit:hover { background: #e2e8f0; color: #333; }
 
+      /* 暗色仪表盘卡片 */
       .modern-board { background: var(--dark-bg); border-radius: 16px; padding: 12px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); animation: slideUp 0.6s 0.4s both; }
-      
       .rank-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; }
       
-      /* 包装器：用于顺滑撑开空间 */
-      .rank-row-wrapper { 
-        overflow: hidden; 
-        transition: max-height 0.4s cubic-bezier(0.25, 1, 0.5, 1), margin-bottom 0.4s cubic-bezier(0.25, 1, 0.5, 1);
-        max-height: 60px; 
-        margin-bottom: 8px;
-      }
+      /* 行包装器：用于顺滑撑开空间 (重要动画属性) */
+      .rank-row-wrapper { overflow: hidden; max-height: 60px; margin-bottom: 8px; transition: max-height 0.4s cubic-bezier(0.25, 1, 0.5, 1), margin-bottom 0.4s cubic-bezier(0.25, 1, 0.5, 1); }
       .rank-row-wrapper:last-child { margin-bottom: 0; }
       
-      /* 新增的包装器：初始高度为0，隐藏状态 */
+      /* 新增的玩家行初始状态：高度为0，隐藏 */
       .rank-row-wrapper.is-new { max-height: 0; margin-bottom: 0; }
       /* 撑开动画类 */
       .rank-row-wrapper.expand { max-height: 60px; margin-bottom: 8px; }
@@ -63,15 +71,16 @@
       .rank-name { flex: 1; text-align: left; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
       .rank-score { font-size: 16px; font-weight: 900; color: #fff; }
 
-      /* --- 重击动画特效 (The Impact Juice) --- */
+      /* 当前玩家行的绿色高亮状态 */
       .player-row { background: var(--main-green); color: #fff; transform-origin: center; opacity: 0; }
       .player-row .rank-num { color: rgba(255,255,255,0.8); }
       .player-row .rank-score { color: #fff; }
 
+      /* --- 重击与震屏动画 Class (Impact Juice) --- */
       .anim-slam-in { animation: slamIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
       .shake-board { animation: shakeBoard 0.4s cubic-bezier(.36,.07,.19,.97) both; }
 
-      /* --- 弹窗样式不变 --- */
+      /* --- 弹窗 Modal 样式 --- */
       #name-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(26, 29, 32, 0.8); backdrop-filter: blur(8px); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 100; opacity: 0; transition: opacity 0.3s; }
       .modal-content { background: white; padding: 30px 25px; border-radius: 20px; width: 80%; max-width: 300px; text-align: center; transform: translateY(20px); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
       .modal-title { font-family: 'Montserrat', sans-serif; font-size: 20px; font-weight: 900; color: #111; margin: 0 0 8px 0; }
@@ -82,27 +91,15 @@
       .btn-skip { flex: 1; background: #f0f4f8; color: #666; border: none; padding: 15px; border-radius: 12px; font-weight: 700; cursor: pointer; }
       .btn-save { flex: 2; background: var(--main-green); color: white; border: none; padding: 15px; border-radius: 12px; font-family: 'Montserrat', sans-serif; font-weight: 900; cursor: pointer; box-shadow: 0 4px 10px rgba(6, 199, 85, 0.2); }
 
-      /* --- 关键帧动画 --- */
+      /* --- CSS 动画帧 --- */
       @keyframes popScale { 0% { transform: scale(0.8); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
       @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
       @keyframes popIn { 0% { transform: scale(0); } 80% { transform: scale(1.1); } 100% { transform: scale(1); } }
       @keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
-      
-      /* 重击砸入的放大缩小动画 */
-      @keyframes slamIn { 
-        0% { transform: scale(1.5); opacity: 0; background: #fff; box-shadow: 0 0 40px var(--main-green); } 
-        40% { opacity: 1; }
-        100% { transform: scale(1); opacity: 1; background: var(--main-green); box-shadow: 0 4px 15px rgba(6, 199, 85, 0.4); } 
-      }
-      /* 面板震屏动画 */
-      @keyframes shakeBoard { 
-        0% { transform: translateY(0); } 
-        20% { transform: translateY(8px); } 
-        40% { transform: translateY(-4px); } 
-        60% { transform: translateY(2px); } 
-        80% { transform: translateY(-1px); } 
-        100% { transform: translateY(0); } 
-      }
+      /* 重击砸入的放大收缩动画 */
+      @keyframes slamIn { 0% { transform: scale(1.5); opacity: 0; background: #fff; box-shadow: 0 0 40px var(--main-green); } 40% { opacity: 1; } 100% { transform: scale(1); opacity: 1; background: var(--main-green); box-shadow: 0 4px 15px rgba(6, 199, 85, 0.4); } }
+      /* 面板整体震动 (打击感核心) */
+      @keyframes shakeBoard { 0% { transform: translateY(0); } 20% { transform: translateY(8px); } 40% { transform: translateY(-4px); } 60% { transform: translateY(2px); } 80% { transform: translateY(-1px); } 100% { transform: translateY(0); } }
     </style>
   </head>
 <body>
@@ -112,14 +109,15 @@
       <div id="splash-greeting" class="splash-greeting"></div>
     </div>
 
-    <img src="sfc_logo.png" class="top-logo" alt="Logo" onerror="this.style.display='none'">
+    <img src="sfc_logo.png" class="top-logo" alt="Keio SFC Logo" onerror="this.style.display='none'">
 
     <div class="card" id="main-card">
+      
       <div id="borrow-view">
         <h1>Re:Turn 貸出</h1>
         <p class="subtitle">Mission: Save the Earth</p>
         <div class="id-wrapper"><div id="cid-display" class="container-id">...</div></div>
-        <button id="btn-borrow" class="btn-main" onclick="handleBorrow()">START</button>
+        <button id="btn-borrow" class="btn-main" onclick="handleBorrow()" disabled>INITIALIZING...</button>
       </div>
 
       <div id="success-view" class="success-view">
@@ -157,42 +155,158 @@
     </div>
 
     <script>
+      // ==========================================
+      // 配置区 (重要：必须正确填写)
+      // ==========================================
+      // ⭐ 将下方链接替换为您自己的真实 GAS 部署 URL 执行地址 exec ⭐
+      const GAS_API_URL = "https://script.google.com/macros/s/AKfycbybohIvFuZ7GZC7KVckrjb4mn1SFFT1wG-Z1Anabt02il3N05NweJNgsctcFedsi6QY/exec"; 
+      const MY_LIFF_ID = "2008626930-AddPwDy7"; // 您的 LIFF ID
+      
+      // ==========================================
+      // 全局状态与初始化流程
+      // ==========================================
       let localUserName = localStorage.getItem('return_username');
+      let currentUserId = ""; // 存储 LINE 或本地测试 ID
+      let containerId = "";   // 存储 QR 码中传入的容器 ID
 
       window.onload = function() {
+        // 1. 处理开屏欢迎语逻辑
         if (localUserName) {
           document.getElementById('splash-greeting').innerText = `WELCOME BACK, ${localUserName}`;
         } else {
           document.getElementById('splash-greeting').innerText = `READY TO START`;
         }
-        
+        // 1.8秒后让开屏淡出
         setTimeout(() => { document.getElementById('splash-screen').classList.add('fade-out'); }, 1800);
-        document.getElementById('cid-display').innerText = "C-001";
-        
-        if (window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost') {
-          window.handleBorrow = function() {
-            const btn = document.getElementById('btn-borrow');
-            btn.innerText = "通信中...";
-            setTimeout(() => {
-              const isNew = !localUserName; 
-              // 模拟：用户拿了42分，应该排在第3位
-              simulateSuccessResponse(42, 3, isNew);
-            }, 800);
-          };
+
+        // 2. 解析 QR 码中的 Container ID (例如: ?id=C-001)
+        const urlParams = new URLSearchParams(window.location.search);
+        containerId = urlParams.get('id');
+        if (!containerId) {
+          const liffState = urlParams.get('liff.state');
+          if (liffState && liffState.includes('id=')) containerId = liffState.split('id=')[1];
+        }
+
+        if (containerId) {
+          document.getElementById('cid-display').innerText = containerId;
+          
+          // 3. 判定环境并初始化不同的鉴权流程
+          // 如果不是本地主机，则执行 LIFF 鉴权
+          if (window.location.hostname !== '127.0.0.1' && window.location.hostname !== 'localhost') {
+            initializeLiff();
+          } else {
+            // 🛠️ 本地测试模式后门：赋予假 User ID 并激活 START 按钮 (但点击后依然会发送fetch请求请求 GAS 服务器)
+            console.log("🛠️ 进入本地开发模式：跳过 LIFF 初始化，使用测试 UserID");
+            currentUserId = "local_test_user_001";
+            readyToGo();
+          }
+        } else {
+          document.getElementById('cid-display').innerText = "ERROR";
+          document.getElementById('btn-borrow').innerText = "QRエラー";
         }
       };
 
+      // LINE 真实 LIFF 初始化与登录流程
+      function initializeLiff() {
+        liff.init({ liffId: MY_LIFF_ID }).then(() => {
+          if (liff.isLoggedIn()) {
+            const idToken = liff.getDecodedIDToken();
+            if (idToken) currentUserId = idToken.sub; // 拿到 LINE 的 User ID
+            readyToGo();
+          } else {
+            liff.login(); // 唤起 LINE 登录
+          }
+        }).catch(err => {
+          console.error("LIFF Init Error:", err);
+          document.getElementById('btn-borrow').innerText = "LIFF ERROR";
+        });
+      }
+
+      // 准备就绪：激活 START 按钮
+      function readyToGo() {
+        const btn = document.getElementById('btn-borrow');
+        btn.disabled = false;
+        btn.innerText = "START";
+      }
+
+      // ==========================================
+      // 业务逻辑：发起真实网络请求 (GAS)
+      // ==========================================
+      function handleBorrow() {
+        if (!currentUserId || !containerId) { alert("ユーザー情報、または容器 ID が取得できません。"); return; }
+        
+        const btn = document.getElementById('btn-borrow');
+        btn.disabled = true;
+        btn.innerText = "通信中...";
+
+        // ✨ 向您的 GAS 后端发起真实的借出请求 ✨
+        // 我们在 body 中同时传入了 action: borrow, 用户ID, 和容器ID
+        fetch(GAS_API_URL, {
+          method: 'POST',
+          // 采用 text/plain 形式发送 JSON 字符串，能最鲁棒地规避 GAS CORS 预检报错
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ action: 'borrow', userId: currentUserId, containerId: containerId })
+        })
+        .then(response => response.json())
+        .then(data => {
+          // 如果后端借出和排序计算都成功了
+          if (data.status === 'success' || data.status === 'SUCCESS') {
+            // 这里我们收到后端传来的关键数据：本人分数、本人排名、新用户标志、Top5排行榜数组
+            // 然后把这些真实数据交给强大的重击动画引擎！
+            renderSuccessView(data.borrowCount, data.userRank, data.isNewUser, data.leaderboard);
+          } else {
+            // 后端返回逻辑错误（例如：此容器已被上一个人借出但未还异常）
+            alert("⚠️ サーバーエラー: " + (data.message || "Unknown error"));
+            btn.disabled = false;
+            btn.innerText = "RETRY";
+          }
+        })
+        .catch(err => {
+          // 真正的网络问题或 GAS 链接地址错误
+          console.error("Fetch Error:", err);
+          alert("📡 通信エラー\n\nGAS API 链接配置正确吗？網絡連接好吗？");
+          btn.disabled = false;
+          btn.innerText = "RETRY";
+        });
+      }
+
+      // 改名服务真实 fetch
+      function saveName() {
+        let inputVal = document.getElementById('username-input').value.trim().toUpperCase();
+        if (!inputVal) inputVal = "ECO PLAYER"; 
+        
+        localStorage.setItem('return_username', inputVal);
+        localUserName = inputVal;
+        closeNameModal();
+        
+        // 视觉上先实时同步更新自己的名字
+        const myNameEl = document.getElementById('my-rank-name');
+        if (myNameEl) myNameEl.innerText = localUserName;
+
+        // ✨ 后台异步发送给您的真实 GAS 数据库进行同步记录 ✨
+        if (currentUserId && window.location.hostname !== '127.0.0.1') {
+          fetch(GAS_API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({ action: 'updateName', userId: currentUserId, userName: localUserName })
+          }).catch(err => console.error("改名同步数据库失败，下次借出将恢复原本名字。", err));
+        }
+      }
+
+      // ==========================================
+      // UI 命名弹窗相关逻辑
+      // ==========================================
       function openNameModal() {
         const modal = document.getElementById('name-modal');
         const input = document.getElementById('username-input');
-        input.value = localUserName || ''; 
+        input.value = localUserName || ''; // 如果本地存过名字，自动填入
         modal.style.display = 'flex';
+        // 触发过渡动画
         setTimeout(() => { 
           modal.style.opacity = '1'; 
           document.getElementById('modal-box').style.transform = 'translateY(0)';
         }, 10);
       }
-
       function closeNameModal() {
         const modal = document.getElementById('name-modal');
         modal.style.opacity = '0';
@@ -200,16 +314,11 @@
         setTimeout(() => { modal.style.display = 'none'; }, 300);
       }
 
-      function saveName() {
-        let inputVal = document.getElementById('username-input').value.trim().toUpperCase();
-        if (!inputVal) inputVal = "ECO PLAYER"; 
-        localStorage.setItem('return_username', inputVal);
-        localUserName = inputVal;
-        closeNameModal();
-        const myNameEl = document.getElementById('my-rank-name');
-        if (myNameEl) myNameEl.innerText = localUserName;
-      }
-
+      // ==========================================
+      // 震撼重击动画引擎 (Game Juice 感核心)
+      // ==========================================
+      
+      // 数字滚动效果函数
       function animateValue(obj, start, end, duration) {
         let startTimestamp = null;
         const step = (timestamp) => {
@@ -221,33 +330,34 @@
         window.requestAnimationFrame(step);
       }
 
-      function simulateSuccessResponse(userScore, userRank, isNewUser) {
+      // ⭐ 核心逻辑：撑开 -> 砸入 -> 震屏 超强打击感反馈
+      function renderSuccessView(userScore, userRank, isNewUser, leaderboardData) {
+        // 1. 切换界面
         document.getElementById('borrow-view').style.display = 'none';
         document.getElementById('success-view').style.display = 'block';
 
-        const totalCO2 = userScore * 94; 
-        const plasticBags = Math.floor(totalCO2 / 30); 
+        // 2. 具象化环保数据滚动动画
+        const totalCO2 = userScore * 94; // 假设借一个省94g
+        const plasticBags = Math.floor(totalCO2 / 30); // 1个レジ袋=30g CO2 类比
         setTimeout(() => {
           animateValue(document.getElementById('co2-count'), 0, totalCO2, 1500);
           document.getElementById('eco-metaphor').innerText = `レジ袋 約 ${plasticBags} 枚分を削減！🛍️`;
         }, 300);
 
-        // ==========================================
-        // 核心震撼动画引擎 (The Squeeze & Slam Engine)
-        // ==========================================
         const listContainer = document.getElementById('leaderboard-list');
-        
-        // 1. 借出前的旧排行榜数据 (不包含当前用户)
-        const oldBoard = [
-          { rank: 1, name: "SFC_GOD", score: 120 },
-          { rank: 2, name: "ECO_NINJA", score: 85 },
-          { rank: 3, name: "PLASTIC_H8", score: 41 }, 
-          { rank: 4, name: "GREEN_WADA", score: 30 }
-        ];
+        listContainer.innerHTML = ''; // 清空列表，准备开始导这场视觉大戏
 
-        // 2. 率先渲染旧榜单
-        oldBoard.forEach(p => {
+        // ==========================================
+        // 视觉打击反馈导戏环节 (极其重要)
+        // ==========================================
+        
+        // ⭐ 第1步 (铺垫)：筛选出 Top5 中“除我之外”的行，作为“旧榜单”立刻静默渲染
+        // 我们只留出真实玩家名次那个位置，先别渲染。
+        const others = leaderboardData.filter(p => !p.isUser);
+        
+        others.forEach(p => {
           let li = document.createElement('li');
+          // 使用包装器 rank-row-wrapper，用于顺滑撑开空间
           li.className = 'rank-row-wrapper';
           li.innerHTML = `
             <div class="rank-row">
@@ -258,12 +368,19 @@
           listContainer.appendChild(li);
         });
 
-        // 3. 蓄力 1.5 秒后发动挤入重击！
+        // ⭐ 第2步 (蓄力)：全场安静 1.5 秒，让旧榜单在界面上呆一小会，产生对比
         setTimeout(() => {
-          const insertIndex = userRank - 1; 
+          
+          // ⭐ 第3步 (硬撑)：确定自己的插入位置，创建自己的隐藏行 (is-new)，撑开这个空间。
+          // 将其他原本在那里的行集体“强迫”滑落下去。
 
-          // (1) 创建用户的行，并将其设为高度为 0 的隐藏包装器
+          // 计算自己应该插在这个列表的第几个位置 (数组索引是从0开始)
+          // 如果真实名次 > 5，为了展示效果，我们把他的行强行插在 Top 5 之后。
+          let insertIndex = userRank <= 5 ? userRank - 1 : others.length; 
+
+          // 创建属于玩家自己的、超炫酷的绿色重击行
           let newLi = document.createElement('li');
+          // 关键：初始状态是 rank-row-wrapper is-new (max-height: 0, 隐藏)
           newLi.className = 'rank-row-wrapper is-new';
           newLi.innerHTML = `
             <div class="rank-row player-row" id="player-inner-card">
@@ -272,42 +389,50 @@
               <span class="rank-score">${userScore}</span>
             </div>`;
           
-          // (2) 插入 DOM 树中对应的名次位置
+          // 将这个隐藏行插队到 DOM 树中对应的索引位置
           listContainer.insertBefore(newLi, listContainer.children[insertIndex]);
-
-          // 强制重绘 (DOM Reflow黑魔法，不要删)
+          
+          // 强制重绘 Reflow (前端黑魔法，触发过渡动画必须运行这一句 offsetWidth)
           void newLi.offsetWidth;
 
-          // (3) 硬挤：撑开包装器高度，逼迫下面的行向下退让
-          newLi.classList.add('expand');
+          // ⭐ 核心挤位：撑开隐藏行，挤动下面的人向下顺延
+          newLi.classList.add('expand'); // max-height 从 0 变 60px cubic-bezier
 
-          // (4) 让被挤下去的倒霉蛋名次 +1，并闪烁红色
+          // 既然空间撑开了，我们要找到那些因为我们的到来而被迫掉下去的倒霉蛋
+          // 让他们的显示名次 +1，并且闪烁红警告色！🛍️
           const allWrappers = listContainer.querySelectorAll('.rank-row-wrapper');
+          // 从我们的位置下面那行开始遍历
           for (let i = insertIndex + 1; i < allWrappers.length; i++) {
             const numSpan = allWrappers[i].querySelector('.rank-num');
             if (numSpan) {
-              numSpan.innerText = i + 1; // 名次顺延
-              numSpan.style.color = '#ff4d4f'; // 闪烁红光
-              setTimeout(() => numSpan.style.color = '', 800);
+              // 关键逻辑：获得他原来在 Top 5 数组中的序号 (也就是 others 里的数据位置+1)
+              // 这里我们简单获得原本显示的序号，并让它+1
+              const currentOldDisplayRank = parseInt(numSpan.innerText);
+              numSpan.innerText = currentOldDisplayRank + 1; 
+              numSpan.style.color = '#ff4d4f'; // 闪烁红警告
+              setTimeout(() => numSpan.style.color = '', 800); // 1秒后恢复
             }
           }
 
-          // (5) 重击特效：绿色卡片从天而降砸进来
+          // ⭐ 第4步 (重击)：在撑开空间的同一瞬间，让内部的绿色卡片从天而降，砸入！
           const playerCard = document.getElementById('player-inner-card');
-          playerCard.classList.add('anim-slam-in');
+          playerCard.classList.add('anim-slam-in'); // 放大收缩效果
 
-          // (6) 震屏特效：整个排行榜黑框随之颤抖
+          // ⭐ 第5步 (震屏)：砸入后约 150ms 触发整个排行榜黑色框随之剧烈颤抖，打击感爆棚！🛍️
           const boardDiv = document.getElementById('board-container');
-          boardDiv.classList.add('shake-board');
-
-          // (7) 定点爆破：在卡片砸入的瞬间喷射礼花
           setTimeout(() => {
-            confetti({ particleCount: 50, spread: 80, origin: { y: 0.7 }, colors: ['#06C755', '#ffffff'] });
+             boardDiv.classList.add('shake-board'); 
           }, 150);
 
-        }, 1500); // 1.5秒的旧榜单展示与蓄力期
+          // ⭐ 第6步 (礼花)：配合定点，在砸入的卡片处炸开粒子！🛍️
+          setTimeout(() => {
+            confetti({ particleCount: 50, spread: 80, origin: { y: 0.7 }, colors: ['#06C755', '#ffffff'] });
+          }, 200);
 
-        // 首次借出弹窗提示
+        }, 1500); // 结束旧榜单蓄力展示期
+
+        // --- 起名 Modal 处理逻辑 (保留) ---
+        // 为了不在超酷的重击动画播完前打扰用户，我们延迟 4 秒弹出
         if (isNewUser) {
           setTimeout(openNameModal, 4000); 
         }
