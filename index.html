@@ -408,7 +408,7 @@
               // 关键逻辑：获得他原来在 Top 5 数组中的序号 (也就是 others 里的数据位置+1)
               // 这里我们简单获得原本显示的序号，并让它+1
               const currentOldDisplayRank = parseInt(numSpan.innerText);
-              numSpan.innerText = currentOldDisplayRank + 1; 
+              numSpan.innerText = currentOldDisplayRank; 
               numSpan.style.color = '#ff4d4f'; // 闪烁红警告
               setTimeout(() => numSpan.style.color = '', 800); // 1秒后恢复
             }
