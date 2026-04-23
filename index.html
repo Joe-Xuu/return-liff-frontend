@@ -142,6 +142,10 @@
       </div>
     </div>
 
+    <div class="footer-credit">
+      Keio SFC Wada Lab | 2025 © Designed & Developed by Kouzen Jo
+    </div>
+
     <div id="name-modal">
       <div class="modal-content" id="modal-box">
         <div class="modal-title">PLAYER NAME</div>
@@ -399,7 +403,7 @@
           newLi.classList.add('expand'); // max-height 从 0 变 60px cubic-bezier
 
           // 既然空间撑开了，我们要找到那些因为我们的到来而被迫掉下去的倒霉蛋
-          // 让他们的显示名次 +1，并且闪烁红警告色！🛍️
+          // 显示名次并且闪烁红警告色！🛍️
           const allWrappers = listContainer.querySelectorAll('.rank-row-wrapper');
           // 从我们的位置下面那行开始遍历
           for (let i = insertIndex + 1; i < allWrappers.length; i++) {
