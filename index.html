@@ -114,8 +114,8 @@
     <div class="card" id="main-card">
       
       <div id="borrow-view">
-        <h1>Re:Turn 貸出</h1>
-        <p class="subtitle">Mission: Save the Earth</p>
+        <h1>Re:Turn 貸出システム</h1>
+        <p class="subtitle">以下の容器を借りますか？</p>
         <div class="id-wrapper"><div id="cid-display" class="container-id">...</div></div>
         <button id="btn-borrow" class="btn-main" onclick="handleBorrow()" disabled>INITIALIZING...</button>
       </div>
@@ -132,7 +132,7 @@
         
         <div class="board-header">
           <h3 class="board-title">SFC LEADERBOARD</h3>
-          <button class="btn-edit" onclick="openNameModal()">✏️ Edit Name</button>
+          <button class="btn-edit" onclick="openNameModal()">✏️ 名前変更</button>
         </div>
 
         <div class="modern-board" id="board-container">
@@ -226,7 +226,7 @@
       function readyToGo() {
         const btn = document.getElementById('btn-borrow');
         btn.disabled = false;
-        btn.innerText = "START";
+        btn.innerText = "はい";
       }
 
       // ==========================================
@@ -269,7 +269,7 @@
           btn.innerText = "RETRY";
         });
       }
-      
+
       function saveName() {
         let inputVal = document.getElementById('username-input').value.trim().toUpperCase();
         if (!inputVal) inputVal = "ECO PLAYER"; 
@@ -288,7 +288,7 @@
             method: 'POST',
             headers: { 'Content-Type': 'text/plain;charset=utf-8' },
             body: JSON.stringify({ action: 'updateName', userId: currentUserId, userName: localUserName })
-          }).catch(err => console.error("改名同步数据库失败，下次借出将恢复原本名字。", err));
+          }).catch(err => console.error("DB update failed", err));
         }
       }
 
