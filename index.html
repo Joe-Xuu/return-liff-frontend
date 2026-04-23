@@ -269,97 +269,29 @@
           btn.innerText = "RETRY";
         });
       }
-
-      // 改名服务真实 fetch
-      // function saveName() {
-      //   let inputVal = document.getElementById('username-input').value.trim().toUpperCase();
-      //   if (!inputVal) inputVal = "ECO PLAYER"; 
+      
+      function saveName() {
+        let inputVal = document.getElementById('username-input').value.trim().toUpperCase();
+        if (!inputVal) inputVal = "ECO PLAYER"; 
         
-      //   localStorage.setItem('return_username', inputVal);
-      //   localUserName = inputVal;
-      //   closeNameModal();
+        localStorage.setItem('return_username', inputVal);
+        localUserName = inputVal;
+        closeNameModal();
         
-      //   // 视觉上先实时同步更新自己的名字
-      //   const myNameEl = document.getElementById('my-rank-name');
-      //   if (myNameEl) myNameEl.innerText = localUserName;
+        // 视觉上先实时同步更新自己的名字
+        const myNameEl = document.getElementById('my-rank-name');
+        if (myNameEl) myNameEl.innerText = localUserName;
 
-      //   // ✨ 后台异步发送给您的真实 GAS 数据库进行同步记录 ✨
-      //   if (currentUserId && window.location.hostname !== '127.0.0.1') {
-      //     fetch(GAS_API_URL, {
-      //       method: 'POST',
-      //       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      //       body: JSON.stringify({ action: 'updateName', userId: currentUserId, userName: localUserName })
-      //     }).catch(err => console.error("改名同步数据库失败，下次借出将恢复原本名字。", err));
-      //   }
-      // }
-
-      // ==========================================
-        // 带查重机制的改名请求
-        // ==========================================
-        function saveName() {
-            let inputVal = document.getElementById('username-input').value.trim().toUpperCase();
-            if (!inputVal) inputVal = "ECO PLAYER"; 
-
-            // 如果是默认名字，不需要查重，直接保存
-            if (inputVal === "ECO PLAYER") {
-                finishSaveName(inputVal);
-                return;
-            }
-
-            // 如果当前没有获取到 UserID (比如在本地某些测试环境下)
-            if (!currentUserId) {
-                alert("ユーザーIDが見つかりません。");
-                return;
-            }
-
-            // 1. 让按钮进入 Loading 状态，防止用户狂点
-            const btnSave = document.querySelector('.btn-save');
-            const originalText = btnSave.innerText;
-            btnSave.innerText = "CHECKING...";
-            btnSave.disabled = true;
-
-            // 2. 向 GAS 发起真实的查重与更新请求
-            fetch(GAS_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                body: JSON.stringify({ action: 'updateName', userId: currentUserId, userName: inputVal })
-            })
-            .then(res => res.json())
-            .then(data => {
-                // 恢复按钮状态
-                btnSave.innerText = originalText;
-                btnSave.disabled = false;
-
-                // 3. 根据后端返回的状况决定动作
-                if (data.status === 'duplicate') {
-                    // ⛔ 发现同名！弹出警告，不关闭弹窗
-                    alert(`⚠️ 「${inputVal}」は既にが使用されています！\n別の名前を入力してください。`);
-                } else if (data.status === 'success' || data.status === 'SUCCESS') {
-                    // ✅ 查重通过！
-                    finishSaveName(inputVal);
-                } else {
-                    alert("エラーが発生しました。もう一度お試しください。");
-                }
-            })
-            .catch(err => {
-                console.error("改名请求失败", err);
-                btnSave.innerText = originalText;
-                btnSave.disabled = false;
-                alert("通信エラー。ネットワークを確認してください。");
-            });
+        // ✨ 后台异步发送给您的真实 GAS 数据库进行同步记录 ✨
+        if (currentUserId && window.location.hostname !== '127.0.0.1') {
+          fetch(GAS_API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({ action: 'updateName', userId: currentUserId, userName: localUserName })
+          }).catch(err => console.error("改名同步数据库失败，下次借出将恢复原本名字。", err));
         }
+      }
 
-        // 查重通过后的收尾工作分离成独立函数
-        function finishSaveName(validatedName) {
-            localStorage.setItem('return_username', validatedName);
-            localUserName = validatedName;
-            
-            closeNameModal();
-            
-            // 实时更新当前页面排行榜里自己的名字
-            const myNameEl = document.getElementById('my-rank-name');
-            if (myNameEl) myNameEl.innerText = localUserName;
-        }
 
       // ==========================================
       // UI 命名弹窗相关逻辑
