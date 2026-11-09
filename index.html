@@ -343,7 +343,7 @@
         document.getElementById('success-view').style.display = 'block';
 
         // 2. 具象化环保数据滚动动画
-        const totalCO2 = userScore * 36; // 36g CO2 per use = 1 single-use paper container avoided (Megloo LCA)
+        const totalCO2 = userScore * 139; // 36g CO2 per use = 1 single-use paper container avoided (Megloo LCA)
         const plasticBags = Math.floor(totalCO2 / 30); // 1个レジ袋=30g CO2 类比
         setTimeout(() => {
           animateValue(document.getElementById('co2-count'), 0, totalCO2, 1500);
